@@ -11,6 +11,7 @@
   /home/hassan/Android/Sdk/ndk/21.0.6113669/sources/cxx-stl/llvm-libc++/include/errno.h \
   /home/hassan/Desktop/andriod/ndktesting/app/src/main/jni/include/fpdfview.h \
   /home/hassan/Desktop/andriod/ndktesting/app/src/main/jni/include/fpdf_doc.h \
+  /home/hassan/Desktop/andriod/ndktesting/app/src/main/jni/include/fpdf_text.h \
   /home/hassan/Android/Sdk/ndk/21.0.6113669/sources/cxx-stl/llvm-libc++/include/string \
   /home/hassan/Android/Sdk/ndk/21.0.6113669/sources/cxx-stl/llvm-libc++/include/string_view \
   /home/hassan/Android/Sdk/ndk/21.0.6113669/sources/cxx-stl/llvm-libc++/include/__string \
@@ -73,6 +74,8 @@
 /home/hassan/Desktop/andriod/ndktesting/app/src/main/jni/include/fpdfview.h:
 
 /home/hassan/Desktop/andriod/ndktesting/app/src/main/jni/include/fpdf_doc.h:
+
+/home/hassan/Desktop/andriod/ndktesting/app/src/main/jni/include/fpdf_text.h:
 
 /home/hassan/Android/Sdk/ndk/21.0.6113669/sources/cxx-stl/llvm-libc++/include/string:
 

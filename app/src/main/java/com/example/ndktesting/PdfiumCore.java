@@ -12,6 +12,7 @@ import com.example.ndktesting.util.Size;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +48,6 @@ public class PdfiumCore {
     private native void nativeCloseDocument(long docPtr);
 
     private native int nativeGetPageCount(long docPtr);
-
 
 
     private native long nativeLoadPage(long docPtr, int pageIndex);
@@ -102,6 +102,18 @@ public class PdfiumCore {
     private native Point nativePageCoordsToDevice(long pagePtr, int startX, int startY, int sizeX,
                                                   int sizeY, int rotate, double pageX, double pageY);
 
+    //get text of the pdf
+    private native long nativeTextLoadPage(long pagePtr);
+
+    private native int nativeGetTotalCharactersInPage(long pagePtr);
+
+    private native void  nativeCloseTextpage(long pagePtr);
+
+    private native long nativeTextSearchHandler(long pagePtr , int startIndex , String word);
+
+    private native boolean nativeIfMatchFound(long handler);
+
+    private native String nativeGetText(long pageptr , int start , int count);
 
     /* synchronize native methods */
     private static final Object lock = new Object();
@@ -463,8 +475,42 @@ public class PdfiumCore {
         return new RectF(leftTop.x, leftTop.y, rightBottom.x, rightBottom.y);
     }
 
-    public static void main(String[] args) {
-        System.out.println("hello");
+
+    //updating the liibrary from here first try lets check it out
+
+    public long getPdfTextPageLoad(PdfDocument doc , int pageIndex){
+        long pagePtr;
+        long text;
+        synchronized (lock) {
+            pagePtr = nativeLoadPage(doc.mNativeDocPtr, pageIndex);
+            doc.mNativePagesPtr.put(pageIndex, pagePtr);
+
+            text = nativeTextLoadPage(pagePtr);
+
+            return text;
+        }
+    }
+
+    public int getPageCharcters(long page){
+        synchronized (lock) {
+            return nativeGetTotalCharactersInPage(page);
+        }
+    }
+
+
+    public boolean SearchWord(String word , long page)  {
+        synchronized (lock){
+
+            return nativeIfMatchFound(nativeTextSearchHandler(page,1,word));
+        }
+    }
+
+
+    public String getText(long page, int start , int count){
+
+        synchronized (lock){
+            return nativeGetText(page,start,count);
+        }
     }
 
 }

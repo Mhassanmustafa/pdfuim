@@ -16,6 +16,11 @@ using namespace android;
 
 #include <fpdfview.h>
 #include <fpdf_doc.h>
+
+//inclue the header file in library
+#include <fpdf_text.h>
+
+
 #include <string>
 #include <vector>
 #include <cstddef>
@@ -776,4 +781,92 @@ Java_com_example_ndktesting_PdfiumCore_nativeadd(JNIEnv *env, jobject thiz, jint
     int sum  = value + 10;
 
     return sum;
+}extern "C"
+JNIEXPORT jlong JNICALL
+Java_com_example_ndktesting_PdfiumCore_nativeTextLoadPage(JNIEnv *env, jobject thiz,
+                                                          jlong page_ptr) {
+    // TODO: implement nativeTextLoadPage()
+    FPDF_PAGE page = reinterpret_cast<FPDF_PAGE>(page_ptr);
+
+    return reinterpret_cast<jlong>(FPDFText_LoadPage(page));
+}extern "C"
+JNIEXPORT jint JNICALL
+Java_com_example_ndktesting_PdfiumCore_nativeGetTotalCharactersInPage(JNIEnv *env, jobject thiz,
+                                                                      jlong page_ptr) {
+    // TODO: implement nativeGetTotalCharactersInPage()
+
+    FPDF_TEXTPAGE page = reinterpret_cast<FPDF_TEXTPAGE>(page_ptr);
+
+
+    return (jint)FPDFText_CountChars(page);
+
+
+}extern "C"
+JNIEXPORT void JNICALL
+Java_com_example_ndktesting_PdfiumCore_nativeCloseTextpage(JNIEnv *env, jobject thiz,
+                                                           jlong page_ptr) {
+    // TODO: implement nativeCloseTextpage()
+    FPDF_TEXTPAGE page = reinterpret_cast<FPDF_TEXTPAGE>(page_ptr);
+
+    FPDFText_ClosePage(page);
+
+}
+
+extern "C"
+JNIEXPORT jlong JNICALL
+Java_com_example_ndktesting_PdfiumCore_nativeTextSearchHandler(JNIEnv *env, jobject thiz,
+                                                               jlong page_ptr, jint start_index,
+                                                               jstring word) {
+    // TODO: implement nativeTextSearchHandler()
+    FPDF_TEXTPAGE page = reinterpret_cast<FPDF_TEXTPAGE>(page_ptr);
+
+    const char *ctag = env->GetStringUTFChars(word, NULL);
+
+    int length = env->GetStringLength(word);
+    const FPDF_WCHAR* wcFind = env->GetStringChars(word, 0);
+
+
+
+
+    return reinterpret_cast<jlong>(FPDFText_FindStart(page, (FPDF_WCHAR*)wcFind,
+                                                      FPDF_MATCHCASE, start_index));
+}extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_example_ndktesting_PdfiumCore_nativeIfMatchFound(JNIEnv *env, jobject thiz,
+                                                          jlong handler) {
+
+    // TODO: implement nativeIfMatchFound()
+
+   // return (jint*)searchHandle;
+    FPDF_SCHHANDLE pSearchHandle = reinterpret_cast<FPDF_SCHHANDLE>(handler);
+    FPDF_BOOL isMatch = FPDFText_FindNext(pSearchHandle);
+    LOGD("FPDFText_FindNext Match is %x",isMatch);
+    return isMatch;
+
+
+    //return FPDFText_FindNext(reinterpret_cast<FPDF_SCHHANDLE>(handler));
+}
+
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_example_ndktesting_PdfiumCore_nativeGetText(JNIEnv *env, jobject thiz, jlong pageptr,
+                                                     jint start, jint count) {
+    // TODO: implement nativeGetText()
+    FPDF_DWORD bufflen = 0;
+
+    FPDF_TEXTPAGE pTextPage = reinterpret_cast<FPDF_TEXTPAGE>(pageptr);
+
+    FPDF_WCHAR* pBuff = new FPDF_WCHAR[count+1];
+
+
+    int ret = FPDFText_GetText(pTextPage, start, count, pBuff);
+
+    if(ret == 0){
+        LOGE("FPDFTextGetText: FPDFTextGetText did not return success");
+    }
+    //LOGE("FPDFTextGetText: %x" , ret);
+    jstring Text = env->NewString(pBuff, ret-1);
+    //delete pBuff;
+
+    return Text;
 }
