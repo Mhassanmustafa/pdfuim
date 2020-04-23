@@ -214,6 +214,30 @@ static jlong loadPageInternal(JNIEnv *env, DocumentFile *doc, int pageIndex){
     }
 }
 
+static jlong loadTextPageInternal(JNIEnv *env, DocumentFile *doc, int textPageIndex){
+    try{
+        if(doc == NULL) throw "Get page document null";
+
+        FPDF_PAGE page = reinterpret_cast<FPDF_PAGE>(loadPageInternal(env, doc, textPageIndex));
+        if(page != NULL){
+            FPDF_TEXTPAGE textPage = FPDFText_LoadPage(page);
+            if (textPage == NULL) {
+                throw "Loaded text page is null";
+            }
+            return reinterpret_cast<jlong>(textPage);
+        }else{
+            throw "Load page null";
+        }
+    }catch(const char *msg){
+        LOGE("%s", msg);
+
+        jniThrowException(env, "java/lang/IllegalStateException",
+                          "cannot load text page");
+
+        return -1;
+    }
+}
+
 static void closePageInternal(jlong pagePtr) { FPDF_ClosePage(reinterpret_cast<FPDF_PAGE>(pagePtr)); }
 
 
@@ -536,7 +560,10 @@ LOGD("Draw Ver: %d", drawSizeVer);*/
     }
 
     AndroidBitmap_unlockPixels(env, bitmap);
-}extern "C"
+}
+
+
+extern "C"
 JNIEXPORT void JNICALL
 Java_com_example_ndktesting_PdfiumCore_nativeRenderPage(JNIEnv *env, jobject thiz, jlong page_ptr,
                                                      jobject surface, jint dpi, jint start_x,
@@ -578,21 +605,27 @@ Java_com_example_ndktesting_PdfiumCore_nativeRenderPage(JNIEnv *env, jobject thi
 
     ANativeWindow_unlockAndPost(nativeWindow);
     ANativeWindow_release(nativeWindow);
-}extern "C"
+}
+
+extern "C"
 JNIEXPORT jint JNICALL
 Java_com_example_ndktesting_PdfiumCore_nativeGetPageHeightPoint(JNIEnv *env, jobject thiz,
                                                              jlong page_ptr) {
     // TODO: implement nativeGetPageHeightPoint()
     FPDF_PAGE page = reinterpret_cast<FPDF_PAGE>(page_ptr);
     return (jint)FPDF_GetPageHeight(page);
-}extern "C"
+}
+
+extern "C"
 JNIEXPORT jint JNICALL
 Java_com_example_ndktesting_PdfiumCore_nativeGetPageWidthPoint(JNIEnv *env, jobject thiz,
                                                             jlong pagePtr) {
     // TODO: implement nativeGetPageWidthPoint()
     FPDF_PAGE page = reinterpret_cast<FPDF_PAGE>(pagePtr);
     return (jint)FPDF_GetPageWidth(page);
-}extern "C"
+}
+
+extern "C"
 JNIEXPORT jint JNICALL
 Java_com_example_ndktesting_PdfiumCore_nativeGetPageHeightPixel(JNIEnv *env, jobject thiz,
                                                              jlong pagePtr, jint dpi) {
@@ -600,14 +633,18 @@ Java_com_example_ndktesting_PdfiumCore_nativeGetPageHeightPixel(JNIEnv *env, job
 
     FPDF_PAGE page = reinterpret_cast<FPDF_PAGE>(pagePtr);
     return (jint)(FPDF_GetPageHeight(page) * dpi / 72);
-}extern "C"
+}
+
+extern "C"
 JNIEXPORT jint JNICALL
 Java_com_example_ndktesting_PdfiumCore_nativeGetPageWidthPixel(JNIEnv *env, jobject thiz,
                                                             jlong pagePtr, jint dpi) {
     // TODO: implement nativeGetPageWidthPixel()
     FPDF_PAGE page = reinterpret_cast<FPDF_PAGE>(pagePtr);
     return (jint)(FPDF_GetPageWidth(page) * dpi / 72);
-}extern "C"
+}
+
+extern "C"
 JNIEXPORT void JNICALL
 Java_com_example_ndktesting_PdfiumCore_nativeClosePages(JNIEnv *env, jobject thiz,
                                                      jlongArray pages_ptr) {
@@ -617,12 +654,16 @@ Java_com_example_ndktesting_PdfiumCore_nativeClosePages(JNIEnv *env, jobject thi
 
     int i;
     for(i = 0; i < length; i++){ closePageInternal(pages[i]); }
-}extern "C"
+}
+
+extern "C"
 JNIEXPORT void JNICALL
 Java_com_example_ndktesting_PdfiumCore_nativeClosePage(JNIEnv *env, jobject thiz, jlong page_ptr) {
     // TODO: implement nativeClosePage()
     closePageInternal(page_ptr);
-}extern "C"
+}
+
+extern "C"
 JNIEXPORT jlongArray JNICALL
 Java_com_example_ndktesting_PdfiumCore_nativeLoadPages(JNIEnv *env, jobject thiz, jlong doc_ptr,
                                                     jint from_index, jint to_index) {
@@ -641,33 +682,43 @@ Java_com_example_ndktesting_PdfiumCore_nativeLoadPages(JNIEnv *env, jobject thiz
     env -> SetLongArrayRegion(javaPages, 0, (jsize)(to_index - from_index + 1), (const jlong*)pages);
 
     return javaPages;
-}extern "C"
+}
+
+extern "C"
 JNIEXPORT jlong JNICALL
 Java_com_example_ndktesting_PdfiumCore_nativeLoadPage(JNIEnv *env, jobject thiz, jlong doc_ptr,
                                                    jint page_index) {
     // TODO: implement nativeLoadPage()
     DocumentFile *doc = reinterpret_cast<DocumentFile*>(doc_ptr);
     return loadPageInternal(env, doc, (int)page_index);
-}extern "C"
+}
+
+extern "C"
 JNIEXPORT jint JNICALL
 Java_com_example_ndktesting_PdfiumCore_nativeGetPageCount(JNIEnv *env, jobject thiz, jlong doc_ptr) {
     // TODO: implement nativeGetPageCount()
     DocumentFile *doc = reinterpret_cast<DocumentFile*>(doc_ptr);
     return (jint)FPDF_GetPageCount(doc->pdfDocument);
-}extern "C"
+}
+
+extern "C"
 JNIEXPORT jstring JNICALL
 Java_com_example_ndktesting_MainActivity_nativetest(JNIEnv *env, jobject /*thiz*/) {
     // TODO: implement nativetest()
     std::string hello = "Hello from C++";
     return env->NewStringUTF(hello.c_str());
-}extern "C"
+}
+
+extern "C"
 JNIEXPORT void JNICALL
 Java_com_example_ndktesting_PdfiumCore_nativeCloseDocument(JNIEnv *env, jobject thiz, jlong doc_ptr) {
     // TODO: implement nativeCloseDocument()
     DocumentFile *doc = reinterpret_cast<DocumentFile*>(doc_ptr);
 
     delete doc;
-}extern "C"
+}
+
+extern "C"
 JNIEXPORT jlong JNICALL
 Java_com_example_ndktesting_PdfiumCore_nativeOpenMemDocument(JNIEnv *env, jobject thiz,
                                                           jbyteArray data, jstring password) {
@@ -713,7 +764,10 @@ Java_com_example_ndktesting_PdfiumCore_nativeOpenMemDocument(JNIEnv *env, jobjec
 
     return reinterpret_cast<jlong>(docFile);
 
-}extern "C"
+}
+
+
+extern "C"
 JNIEXPORT jlong JNICALL
 Java_com_example_ndktesting_PdfiumCore_nativeOpenDocument(JNIEnv *env, jobject thiz, jint fd,
                                                        jstring password) {
@@ -774,14 +828,18 @@ Java_com_example_ndktesting_MainActivity_nativeadd(JNIEnv *env, jobject thiz, ji
     int sum  = value + 10;
 
     return sum;
-}extern "C"
+}
+
+extern "C"
 JNIEXPORT jint JNICALL
 Java_com_example_ndktesting_PdfiumCore_nativeadd(JNIEnv *env, jobject thiz, jint value) {
     // TODO: implement nativeadd()
     int sum  = value + 10;
 
     return sum;
-}extern "C"
+}
+
+extern "C"
 JNIEXPORT jlong JNICALL
 Java_com_example_ndktesting_PdfiumCore_nativeTextLoadPage(JNIEnv *env, jobject thiz,
                                                           jlong page_ptr) {
@@ -789,7 +847,9 @@ Java_com_example_ndktesting_PdfiumCore_nativeTextLoadPage(JNIEnv *env, jobject t
     FPDF_PAGE page = reinterpret_cast<FPDF_PAGE>(page_ptr);
 
     return reinterpret_cast<jlong>(FPDFText_LoadPage(page));
-}extern "C"
+}
+
+extern "C"
 JNIEXPORT jint JNICALL
 Java_com_example_ndktesting_PdfiumCore_nativeGetTotalCharactersInPage(JNIEnv *env, jobject thiz,
                                                                       jlong page_ptr) {
@@ -830,7 +890,9 @@ Java_com_example_ndktesting_PdfiumCore_nativeTextSearchHandler(JNIEnv *env, jobj
 
     return reinterpret_cast<jlong>(FPDFText_FindStart(page, (FPDF_WCHAR*)wcFind,
                                                       FPDF_MATCHCASE, start_index));
-}extern "C"
+}
+
+extern "C"
 JNIEXPORT jboolean JNICALL
 Java_com_example_ndktesting_PdfiumCore_nativeIfMatchFound(JNIEnv *env, jobject thiz,
                                                           jlong handler) {
@@ -869,4 +931,132 @@ Java_com_example_ndktesting_PdfiumCore_nativeGetText(JNIEnv *env, jobject thiz, 
     //delete pBuff;
 
     return Text;
+}
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_example_ndktesting_PdfiumCore_nativeGetSearchCount(JNIEnv *env, jobject thiz,
+                                                            jlong handler) {
+    // TODO: implement nativeGetSearchCount()
+    FPDF_SCHHANDLE pSearchHandle = reinterpret_cast<FPDF_SCHHANDLE>(handler);
+    jint result = FPDFText_GetSchCount(pSearchHandle);
+
+    LOGE("FPDFTextcount: %x" , FPDFText_GetSchCount(pSearchHandle));
+    return result;
+}
+
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_example_ndktesting_PdfiumCore_nativePreviousMatch(JNIEnv *env, jobject thiz,
+                                                           jlong handler) {
+    // TODO: implement nativePreviousMatch()
+    FPDF_SCHHANDLE pSearchHandle = reinterpret_cast<FPDF_SCHHANDLE>(handler);
+
+    return FPDFText_FindPrev(pSearchHandle);
+}
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_example_ndktesting_PdfiumCore_nativeGetSearchIndex(JNIEnv *env, jobject thiz,
+                                                            jlong handler) {
+    // TODO: implement nativeGetSearchIndex()
+    FPDF_SCHHANDLE pSearchHandle = reinterpret_cast<FPDF_SCHHANDLE>(handler);
+
+    return FPDFText_GetSchResultIndex(pSearchHandle);
+}
+
+extern "C"
+JNIEXPORT jdoubleArray JNICALL
+Java_com_example_ndktesting_PdfiumCore_nativeTextGetCharBox(JNIEnv *env, jobject thiz,
+                                                            jlong text_page_ptr, jint index) {
+    // TODO: implement nativeTextGetCharBox()
+
+    FPDF_TEXTPAGE *textPage = reinterpret_cast<FPDF_TEXTPAGE*>(text_page_ptr);
+    jdoubleArray result = env->NewDoubleArray(4);
+    if (result == NULL) {
+        return NULL;
+    }
+    double fill[4];
+    FPDFText_GetCharBox(textPage, (int)index, &fill[0], &fill[1], &fill[2], &fill[3]);
+    env->SetDoubleArrayRegion(result, 0, 4, (jdouble*)fill);
+    return result;
+}extern "C"
+JNIEXPORT jint JNICALL
+Java_com_example_ndktesting_PdfiumCore_nativeTextGetCharIndexAtPos(JNIEnv *env, jobject thiz,
+                                                                   jlong text_page_ptr, jdouble x,
+                                                                   jdouble y, jdouble x_tolerance,
+                                                                   jdouble y_tolerance) {
+    // TODO: implement nativeTextGetCharIndexAtPos()
+
+    FPDF_TEXTPAGE *textPage = reinterpret_cast<FPDF_TEXTPAGE*>(text_page_ptr);
+    return (jint)FPDFText_GetCharIndexAtPos(textPage, (double)x, (double)y, (double)x_tolerance, (double)y_tolerance);
+}extern "C"
+JNIEXPORT jint JNICALL
+Java_com_example_ndktesting_PdfiumCore_nativeTextCountRects(JNIEnv *env, jobject thiz,
+                                                            jlong text_page_ptr, jint start_index,
+                                                            jint count) {
+    // TODO: implement nativeTextCountRects()
+    FPDF_TEXTPAGE *textPage = reinterpret_cast<FPDF_TEXTPAGE*>(text_page_ptr);
+    return (jint)FPDFText_CountRects(textPage, (int)start_index, (int) count);
+}extern "C"
+JNIEXPORT jdoubleArray JNICALL
+Java_com_example_ndktesting_PdfiumCore_nativeTextGetRect(JNIEnv *env, jobject thiz,
+                                                         jlong text_page_ptr, jint rect_index) {
+    // TODO: implement nativeTextGetRect()
+    FPDF_TEXTPAGE *textPage = reinterpret_cast<FPDF_TEXTPAGE*>(text_page_ptr);
+    jdoubleArray result = env->NewDoubleArray(4);
+    if (result == NULL) {
+        return NULL;
+    }
+    double fill[4];
+    FPDFText_GetRect(textPage, (int)rect_index, &fill[0], &fill[1], &fill[2], &fill[3]);
+    env->SetDoubleArrayRegion(result, 0, 4, (jdouble*)fill);
+    return result;
+}extern "C"
+JNIEXPORT jint JNICALL
+Java_com_example_ndktesting_PdfiumCore_nativeTextGetBoundedText(JNIEnv *env, jobject thiz,
+                                                                jlong text_page_ptr, jdouble left,
+                                                                jdouble top, jdouble right,
+                                                                jdouble bottom, jshortArray arr) {
+    // TODO: implement nativeTextGetBoundedText()
+    FPDF_TEXTPAGE *textPage = reinterpret_cast<FPDF_TEXTPAGE*>(text_page_ptr);
+    jboolean isCopy = 0;
+    unsigned short *buffer = NULL;
+    int bufLen = 0;
+    if (arr != NULL) {
+        buffer = (unsigned short *)env->GetShortArrayElements(arr, &isCopy);
+        bufLen = env->GetArrayLength(arr);
+    }
+    jint output = (jint)FPDFText_GetBoundedText(textPage, (double)left, (double)top, (double)right, (double)bottom, buffer, bufLen);
+    if (isCopy) {
+        env->SetShortArrayRegion(arr, 0, output, (jshort*)buffer);
+        env->ReleaseShortArrayElements(arr, (jshort*)buffer, JNI_ABORT);
+    }
+    return output;
+}extern "C"
+JNIEXPORT jlongArray JNICALL
+Java_com_example_ndktesting_PdfiumCore_nativeLoadTextPages(JNIEnv *env, jobject thiz, jlong doc_ptr,
+                                                           jint fromIndex, jint toIndex) {
+    // TODO: implement nativeLoadTextPages()
+    DocumentFile *doc = reinterpret_cast<DocumentFile*>(doc_ptr);
+
+    if(toIndex < fromIndex) return NULL;
+    jlong pages[ toIndex - fromIndex + 1 ];
+
+    int i;
+    for(i = 0; i <= (toIndex - fromIndex); i++){
+        pages[i] = loadTextPageInternal(env, doc, (int)(i + fromIndex));
+    }
+
+    jlongArray javaPages = env -> NewLongArray( (jsize)(toIndex - fromIndex + 1) );
+    env -> SetLongArrayRegion(javaPages, 0, (jsize)(toIndex - fromIndex + 1), (const jlong*)pages);
+
+    return javaPages;
+}extern "C"
+JNIEXPORT jint JNICALL
+Java_com_example_ndktesting_PdfiumCore_nativeTextGetUnicode(JNIEnv *env, jobject thiz,
+                                                            jlong text_page_ptr, jint index) {
+    // TODO: implement nativeTextGetUnicode()
+    FPDF_TEXTPAGE *textPage = reinterpret_cast<FPDF_TEXTPAGE*>(text_page_ptr);
+    return (jint)FPDFText_GetUnicode(textPage, (int)index);
 }

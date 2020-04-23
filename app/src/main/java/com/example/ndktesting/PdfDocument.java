@@ -109,7 +109,7 @@ public class PdfDocument {
     /*package*/ ParcelFileDescriptor parcelFileDescriptor;
 
     /*package*/ final Map<Integer, Long> mNativePagesPtr = new ArrayMap<>();
-
+    /*package*/ final Map<Integer, Long> mNativeTextPagesPtr = new ArrayMap<>();
     public boolean hasPage(int index) {
         return mNativePagesPtr.containsKey(index);
     }

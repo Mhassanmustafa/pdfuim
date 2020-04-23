@@ -72,8 +72,8 @@ public class MainActivity extends AppCompatActivity {
 
 
             System.out.println("this is my mark   " + pdfiumCore.getPageCharcters(pdfiumCore.getPdfTextPageLoad(pdfDocument,4)));
-            System.out.println(new String("hassan".getBytes("UTF-8"),"UTF-16LE"));
-            System.out.println("checking match  " + pdfiumCore.SearchWord("book",pdfiumCore.getPdfTextPageLoad(pdfDocument,8)));
+           // System.out.println(new String("hassan".getBytes("UTF-8"),"UTF-16LE"));
+            System.out.println("checking match  " + pdfiumCore.searchWord("book",1,pdfiumCore.getPdfTextPageLoad(pdfDocument,8)));
 
             System.out.println("new chechking" + pdfiumCore.getText(pdfiumCore.getPdfTextPageLoad(pdfDocument,4),0,436));
         } catch (IOException e) {
