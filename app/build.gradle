@@ -1,13 +1,13 @@
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 28
     buildToolsVersion "29.0.3"
 
     defaultConfig {
-        applicationId "com.example.ndktesting"
-        minSdkVersion 16
-        targetSdkVersion 29
+       /* applicationId "com.example.ndktesting"*/
+        minSdkVersion 14
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
 
