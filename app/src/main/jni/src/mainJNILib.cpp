@@ -889,7 +889,7 @@ Java_com_example_ndktesting_PdfiumCore_nativeTextSearchHandler(JNIEnv *env, jobj
 
 
     return reinterpret_cast<jlong>(FPDFText_FindStart(page, (FPDF_WCHAR*)wcFind,
-                                                      FPDF_MATCHCASE, start_index));
+                                                      FPDF_MATCHWHOLEWORD, start_index));
 }
 
 extern "C"
